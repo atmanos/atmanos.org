@@ -12,12 +12,26 @@ page '/*.xml', layout: false
 page '/*.json', layout: false
 page '/*.txt', layout: false
 
+helpers do
+  def image_url(path)
+    prefix = ""
+
+    if config[:host]
+      prefix = config[:host] + "/"
+    end
+
+    prefix + image_path(path)
+  end
+end
+
 configure :development do
   activate :livereload
 end
 
 configure :build do
   activate :relative_assets
+
+  config[:host] = "http://atmanos.org"
 end
 
 activate :deploy do |deploy|
