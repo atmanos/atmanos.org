@@ -10,4 +10,4 @@ fi
 echo "Installing Dependencies..."
 bundle install
 
-git remote add production "https://github.com/atmanos/atmnaos.github.io"
+git remote add production "https://github.com/atmanos/atmanos.github.io"
