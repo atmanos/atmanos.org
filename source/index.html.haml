@@ -1,11 +1,43 @@
 ---
-title: Page Title
+title: AtmanOS
 ---
 
-.delete-me
+%section
   .container
-    %h1 thoughtbot Middleman Starter
-    %p
-      You're all set!
-      <a href="http://github.com/thoughtbot/proteus-middleman">Let's get started</a>
-      building your prototype.
+    %h1.logo Ātman<em>OS</em>
+
+%main
+  .container
+    %p.feature
+      AtmanOS compiles ordinary Go programs into images which can be run
+      on a hypervisor without a conventional operating system.
+
+    :markdown
+      It provides a microkernel and implementation of Go's runtime and standard
+      library implemented natively in Go (with a little bit of Assembly).
+
+      It currently targets the Xen hypervisor, allowing the images to be run
+      on Amazon EC2, Rackspace Cloud, IBM SoftLayer, and other cloud providers.
+
+      ## Documentation and resources
+
+      Learn about the AtmanOS project and why exists by looking through the
+      ["Go without the Operating System"][gophercon] slides from GopherCon 2016
+      (video pending).
+
+      Build AtmanOS and run your first program by following the tutorial for
+      [running programs locally with Vagrant][vagrant-tutorial].
+
+        [gophercon]: talks/go-without-the-os-gophercon-2016/index.html
+        [vagrant-tutorial]: https://github.com/atmanos/atmanos/blob/master/doc/running-locally-with-vagrant.md
+
+      ## Get involved
+
+      Contribute code, documentation, and reviews on the [AtmanOS GitHub
+      project][github]
+
+      Discuss the project and related topics in the [#atmanos channel on the
+      Gophers Slack][slack].
+
+        [github]: https://github.com/atmanos/atmanos
+        [slack]: https://gophers.slack.com/messages/atmanos/

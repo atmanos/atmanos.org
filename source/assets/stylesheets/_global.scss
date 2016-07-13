@@ -1,19 +1,19 @@
 body {
-  background-color: $light-gray;
-  color: $medium-gray;
+  background-color: $white;
+  color: $dark-gray;
+  margin: $base-spacing * 2 auto;
+  max-width: 36em;
 }
 
-.delete-me {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  height: 100vh;
+.feature {
+  font-size: $base-font-size * 1.2;
+}
 
-  .container {
-    text-align: center;
+.logo {
+  font-size: $base-font-size * 4;
 
-    h1 {
-      font-weight: 200;
-    }
+  em {
+    color: $accent-color;
+    font-style: normal;
   }
 }

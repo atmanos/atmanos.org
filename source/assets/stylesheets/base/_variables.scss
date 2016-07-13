@@ -1,6 +1,6 @@
 // Typography
 $base-font-family: $helvetica;
-$heading-font-family: $base-font-family;
+$heading-font-family: 'Roboto Slab', serif;
 
 // Font Sizes
 $base-font-size: 1em;
@@ -20,10 +20,13 @@ $blue: #1565c0;
 $dark-gray: #333;
 $medium-gray: #999;
 $light-gray: #ddd;
+$red: rgb(194, 35, 38);
+$white: #fff;
 
 // Font Colors
 $base-font-color: $dark-gray;
 $action-color: $blue;
+$accent-color: $red;
 
 // Border
 $base-border-color: $light-gray;
