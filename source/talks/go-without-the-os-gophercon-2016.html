@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Go without the Operating System</title>
+    <meta charset='utf-8'>
+    <script>
+      var notesEnabled =  false ;
+    </script>
+    <script src='/talks/static/slides.js'></script>
+  </head>
+
+  <body style='display: none'>
+
+    <section class='slides layout-widescreen'>
+      
+      <article>
+        <h1>Go without the Operating System</h1>
+        <h3>12 July 2016</h3>
+        
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Bernerd Schaefer
+  </p>
+  
+
+  
+  <p>
+    Developer at thoughtbot
+  </p>
+  
+
+          </div>
+        
+      </article>
+      
+  
+  
+      <article>
+      
+        <h2>Without the Operating System?</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Conventional deployment</h3>
+        
+  
+  <p>
+    There&#39;s some physical <b>hardware</b> in a data-center (or closet).
+  </p>
+  
+
+  
+  <p>
+    We want to run <b>multiple user applications</b> on that hardware.
+  </p>
+  
+
+  
+  <p>
+    The <b>operating system</b> allows our applications to safely interface with and share the hardware.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Cloud Deployment</h3>
+        
+  
+  <p>
+    Works like conventional deployment, except multi-tenant.
+  </p>
+  
+
+  
+  <p>
+    A <b>hypervisor</b> allows <b>multiple operating systems</b> to safely interface with and share hardware.
+  </p>
+  
+
+  
+  <p>
+    The <b>operating system</b> duplicates work, allowing user applications to share hardware that&#39;s already shared (or even virtualized).
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Operating systems do a lot</h3>
+        
+  
+  <p>
+    Operating systems do a lot more than manage hardware.
+  </p>
+  
+
+  
+  <p>
+    They provide a <b>general purpose computing environment</b>. Shell scripting, Cron jobs, terminal sessions, POSIX.
+  </p>
+  
+
+  
+  <p>
+    They are built on established, understood tools and have years (or decades) of development and production time.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Operating systems are large projects</h3>
+        
+  
+  <p>
+    Typical server deployments have can 500+ packages built from <b>100,000,000+</b> lines of source code.
+  </p>
+  
+
+  
+  <p>
+    The Linux Kernel alone is <b>15,000,000+</b> lines of code.
+  </p>
+  
+
+  
+  <p>
+    These strongly impact:
+  </p>
+  
+
+  <ul>
+  
+    <li>Boot time</li>
+  
+    <li>Footprint</li>
+  
+    <li>Performance</li>
+  
+    <li>Security (see Heartbleed, Shellshock, ImageTragick)</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Without the Operating System</h3>
+        
+  
+  <p>
+    We can remove the operating system if we run user applications that interface directly with the hypervisor.
+  </p>
+  
+
+  
+  <p>
+    These hypervisor-aware applications are called <b>unikernels</b>.
+  </p>
+  
+
+  
+  <p>
+    Where operating systems are general purpose, unikernels are highly specialized.
+  </p>
+  
+
+  
+  <p>
+    They take a number of forms. Some are for OS research. Others target particular language runtimes, like Haskell and Erlang. And, of course, Go!
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>AtmanOS</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>AtmanOS</h3>
+        
+  
+  <p>
+    It allows you to cross-compile Go programs, just like for Linux and Windows, to run directly on the Xen hypervisor.
+  </p>
+  
+
+  
+  <p>
+    The images can be deployed on Amazon EC2, Linode, Rackspace, and IBM SoftLayer.
+  </p>
+  
+
+  
+  <p>
+    There are a few components:
+  </p>
+  
+
+  <ul>
+  
+    <li>a microkernel implemented in Go (and a little assembly)</li>
+  
+    <li>a suite of packages for communicating with Xen, reading and writing network packets, etc.</li>
+  
+    <li>a port of Go&#39;s runtime and standard library to the microkernel and system packages</li>
+  
+  </ul>
+
+  
+  <p>
+    It&#39;s currently around <b>3,000</b> lines of Go and <b>150</b> lines of Assembly.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Microkernel</h3>
+        
+  
+  <p>
+    Provides memory management, lightweight threads and scheduler, event handlers, and timekeeping.
+  </p>
+  
+
+  
+  <p>
+    Implemented within the <code>runtime</code> package. Normal (if low-level) Go code, with some caveats:
+  </p>
+  
+
+  <ul>
+  
+    <li>stub methods implemented in Assembly</li>
+  
+    <li><code>unsafe</code> for a number of components</li>
+  
+    <li>uses <code>//go:nosplit</code> and <code>//gc:nowritebarrier</code> annotations</li>
+  
+    <li>cannot allocate memory on heap</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>System packages</h3>
+        
+  
+  <p>
+    Provides user-space access to microkernel and Xen:
+  </p>
+  
+
+  <ul>
+  
+    <li><code>atman/mm</code> - allocate physical pages and map machine frames</li>
+  
+    <li><code>atman/xen</code> - interface to core Xen features</li>
+  
+  </ul>
+
+  
+  <p>
+    Also peripherals needed to implement the standard library.
+  </p>
+  
+
+  <ul>
+  
+    <li><code>atman/xenstore</code> - implementation of XenStore protocol for configuration and device drivers</li>
+  
+    <li><code>atman/net</code> - network driver for Xen</li>
+  
+    <li><code>atman/net/ip</code> - TCP/IP implementation</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Porting Go</h3>
+        
+  
+  <p>
+    Implementation of Go&#39;s platform-agnostic functions and types.
+  </p>
+  
+
+  
+  <p>
+    In the <code>runtime</code> package, that&#39;s adapter functions for memory management, time, processes, and locks.
+  </p>
+  
+
+  
+  <p>
+    For the standard library, it&#39;s <code>syscall</code> functions, network types, etc.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h2>Demo: low-level networking</h2>
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Accessing the network device</h3>
+        
+  
+  <p>
+    <code>atamn/net</code> implements Xen&#39;s network device interface, leveraging other AtmanOS packages like <code>atman/mm</code> and <code>atman/xen</code>.
+  </p>
+  
+
+  
+  <p>
+    Enables user-space programs to talk directly to the network device, for example, to read ethernet packets directly from the device.
+  </p>
+  
+
+  
+  <p>
+    <code>github.com/atmanos/example/net</code> is a program which does exactly that.
+  </p>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Building the example program</h3>
+        
+  
+  <p>
+    AtmanOS provides an <code>atman</code> command which wraps <code>go</code> with the appropriate flags for building our program:
+  </p>
+  
+
+  
+  <div class="code"><pre>&gt; atman build github.com/atmanos/example/net</pre></div>
+  
+
+  
+  <p>
+    The build artifact is an ELF executable, with a few special notes so Xen knows how to load it.
+  </p>
+  
+
+  
+  <div class="code"><pre>&gt; file net
+net: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, not stripped
+
+&gt; greadelf --sections net | grep Xen
+  [12] .note.Xen.loader  NOTE             0000000000400fb0  00000fb0
+  [13] .note.Xen.version NOTE             0000000000400f98  00000f98
+  [14] .note.Xen.hyperca NOTE             0000000000400f80  00000f80</pre></div>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Run the example</h3>
+        
+  
+  <p>
+    The <code>net</code> executable can be run from a Xen host using <code>xl</code>, or AtmanOS&#39;s helper script <code>startvm</code>.
+  </p>
+  
+
+  
+  <p>
+    Start the <code>net</code> program with a bridge network device configured and connect to the console:
+  </p>
+  
+
+  
+  <div class="code"><pre>&gt; startvm net -c &#39;vif = [&#34;bridge = xenbr0&#34;]&#39;
+Network device initialized:
+  Mac address: 00:16:3e:4d:4e:04
+  IP address:  ENOENT</pre></div>
+  
+
+  
+  <p>
+    If we ping the MAC accress with `arping -i xenbr0 00:16:3e:4d:4e:04`, we see some packets printed:
+  </p>
+  
+
+  
+  <div class="code"><pre>rx: packet from=&#34;08:00:27:a2:0c:15&#34; to=&#34;00:16:3e:0a:bc:a1&#34; type=0x0800 (IPV4)
+rx: packet from=&#34;08:00:27:a2:0c:15&#34; to=&#34;00:16:3e:0a:bc:a1&#34; type=0x0800 (IPV4)</pre></div>
+  
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>Project status</h3>
+        
+  <ul>
+  
+    <li>Single-processor, cooperatively scheduled threads</li>
+  
+    <li>Non-paging memory manager</li>
+  
+    <li>High-precision timing</li>
+  
+    <li>Debug console (write)</li>
+  
+    <li>Basic infrastructure for networking</li>
+  
+    <li>Basic infrastructure for out-of-tree Xen packages</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+  
+      <article>
+      
+        <h3>What&#39;s next?</h3>
+        
+  <ul>
+  
+    <li>Preemptive scheduler</li>
+  
+    <li>Extract microkernel into <code>runtime/internal</code> packages</li>
+  
+    <li>Test harness</li>
+  
+    <li>Document deployment to EC2, Linode, etc.</li>
+  
+    <li>Finish TCP/IP stack and <code>net</code></li>
+  
+  </ul>
+
+  
+  <p>
+    Future:
+  </p>
+  
+
+  <ul>
+  
+    <li><code>pprof</code> to enable profiling app and OS together</li>
+  
+    <li>Block storage, filesystems, <code>os.File</code>, ...</li>
+  
+    <li>Multi-processor scheduler</li>
+  
+  </ul>
+
+      
+      </article>
+  
+  
+
+      <article>
+        <h3>Thank you</h3>
+        
+          <div class="presenter">
+            
+  
+  <p>
+    Bernerd Schaefer
+  </p>
+  
+
+  
+  <p>
+    Developer at thoughtbot
+  </p>
+  
+<p class="link"><a href="http://twitter.com/bjschaefer" target="_blank">@bjschaefer</a></p><p class="link"><a href="mailto:b@thoughtbot.com" target="_blank">b@thoughtbot.com</a></p>
+          </div>
+        
+      </article>
+
+    </section>
+
+    <div id="help">
+      Use the left and right arrow keys or click the left and right
+      edges of the page to navigate between slides.<br>
+      (Press 'H' or navigate to hide this message.)
+    </div>
+  </body>
+</html>
