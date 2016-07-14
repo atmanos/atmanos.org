@@ -37,6 +37,6 @@ end
 activate :deploy do |deploy|
   deploy.build_before = true
   deploy.deploy_method = :git
-  deploy.remote = 'production'
+  deploy.remote = 'https://github.com/atmanos/atmanos.github.io.git'
   deploy.branch = 'master'
 end

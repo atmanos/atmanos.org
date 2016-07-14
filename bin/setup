@@ -9,5 +9,3 @@ fi
 # Set up Ruby dependencies via Bundler
 echo "Installing Dependencies..."
 bundle install
-
-git remote add production "https://github.com/atmanos/atmanos.github.io"
