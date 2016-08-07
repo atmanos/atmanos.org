@@ -33,10 +33,3 @@ configure :build do
 
   config[:host] = "http://atmanos.org"
 end
-
-activate :deploy do |deploy|
-  deploy.build_before = true
-  deploy.deploy_method = :git
-  deploy.remote = 'https://github.com/atmanos/atmanos.github.io.git'
-  deploy.branch = 'master'
-end
